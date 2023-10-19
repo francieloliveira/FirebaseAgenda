@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -110,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e("FIREBASE ERROR", "Erro ao tentar recuperar dados: " + error.getMessage());
+                showToast("Erro ao tentar recuperar dados");
             }
         });
 
@@ -149,13 +151,21 @@ public class MainActivity extends AppCompatActivity {
                     // É usado para realizar a atualização no banco de dados Firebase. Ele atualiza
                     // os campos especificados no mapa valoresAtualizados para o nó
                     // específico identificado pelo data.getRef().
-                    data.getRef().updateChildren(valoresAtualizados);
-                }
+                    data.getRef().updateChildren(valoresAtualizados).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.i("FIREBASE UPDATE", "Atualização bem-sucedida");
+                            showToast("Atualização bem-sucedida");
+                        } else {
+                            Log.e("FIREBASE ERROR", "Erro ao tentar atualizar dados: " + task.getException().getMessage());
+                            showToast("Erro ao tentar atualizar dados");
+                        }
+                    });                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e("FIREBASE ERROR", "Erro ao tentar consultar dados: " + error.getMessage());
+                showToast("Erro ao tentar consultar dados");
             }
         });
     }
@@ -178,19 +188,24 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Para todos os filhos de snapshot utilizando o nome "data" do tipo DataSnapshot
-                // Espera-se que haja apenas um filho correspondente ao ID fornecido.
                 for (DataSnapshot data : snapshot.getChildren()) {
-                    // Remove o nó específico identificado pelo data.getRef().
-                    data.getRef().removeValue();
-                    // Limpa os campos de entrada após a exclusão.
-                    clearView();
+                    data.getRef().removeValue().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.i("FIREBASE DELETE", "Exclusão bem-sucedida");
+                            showToast("Exclusão bem-sucedida");
+                            clearView();
+                        } else {
+                            Log.e("FIREBASE ERROR", "Erro ao tentar excluir dados: " + task.getException().getMessage());
+                            showToast("Erro ao tentar excluir dados");
+                        }
+                    });
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 // Lida com erros, se necessário.
+                Log.e("FIREBASE ERROR", "Erro ao tentar consultar dados: " + error.getMessage());
             }
         });
     }
@@ -199,6 +214,10 @@ public class MainActivity extends AppCompatActivity {
         mEditTextID.setText("");
         mEditTextName.setText("");
         mEditTextPhone.setText("");
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
 }
