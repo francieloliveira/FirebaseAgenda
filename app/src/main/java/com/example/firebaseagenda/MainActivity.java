@@ -53,6 +53,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean isUserLoggedIn = false;
     EditText mEditTextID, mEditTextName, mEditTextPhone;
     Button mButtonCreate, mButtonRetrieve, mButtonUpdate, mButtonDelete, mButtonGoogleSignIn;
+    ImageView avatarImageView;
+
+    // Recursos String
+    private String loginSuccessMessage;
+    private String loginFailureMessage;
+    private String logoutSuccessMessage;
+    private String logoutFailureMessage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //ImageView
-        ImageView avatarImageView = findViewById(R.id.avatarImageView);
+        avatarImageView = findViewById(R.id.avatarImageView);
+        oneTapClient = Identity.getSignInClient(this);
 
         //EditText
         mEditTextID = findViewById(R.id.editTextID);
@@ -73,6 +82,13 @@ public class MainActivity extends AppCompatActivity {
         mButtonUpdate = findViewById(R.id.buttonUpdate);
         mButtonDelete = findViewById(R.id.buttonDelete);
         mButtonGoogleSignIn = findViewById(R.id.buttonGoogleSignIn);
+
+        // Inicialização dos recursos de string
+        loginSuccessMessage = getString(R.string.login_success_message);
+        loginFailureMessage = getString(R.string.login_failure_message);
+        logoutSuccessMessage = getString(R.string.logout_success_message);
+        //TODO implementar o Logout
+//        logoutFailureMessage = getString(R.string.logout_failure_message);
 
         mButtonCreate.setEnabled(false);
         mButtonRetrieve.setEnabled(false);
@@ -130,29 +146,18 @@ public class MainActivity extends AppCompatActivity {
                 if (isUserLoggedIn) {
                     // If the user is logged in, perform logoff
                     mAuth.signOut();
-                    showToast("Logoff bem-sucedido");
+                    showToast(logoutSuccessMessage);
                     // Update the user state to disconnected
                     isUserLoggedIn = false;
                     // Update the button text
                     updateGoogleSignInButtonText();
                     // Disable buttons after logoff
                     disableButtons();
-                    //Remove avatar
-//                    avatarImageView.setImageDrawable(null);
-//TODO não está removendo a imagem.
-
+                    // Hide avatar
+                    avatarImageView.setVisibility(View.GONE);
                 } else {
                     // If the user is not logged in, start the login flow
                     startGoogleSignInFlow();
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    if (user != null) {
-                        String photoUrl = user.getPhotoUrl().toString();
-                        // Use Glide para carregar a imagem do avatar
-                        Glide.with(getBaseContext())
-                                .load(photoUrl)
-                                .placeholder(R.drawable.placeholder_image) // Recurso de imagem padrão
-                                .into(avatarImageView);
-                    }
                 }
             }
         });
@@ -195,20 +200,37 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Login bem-sucedido
                         FirebaseUser user = mAuth.getCurrentUser();
-                        showToast("Login bem-sucedido como " + user.getDisplayName());
+                        showToast(loginSuccessMessage + user.getDisplayName());
 
-                        enableButtons();
                         // Atualizar o estado do usuário como logado
                         isUserLoggedIn = true;
 
                         // Atualizar o texto do botão
                         updateGoogleSignInButtonText();
+
+                        // Habilitar botões
+                        enableButtons();
+
+                        // Carregar a imagem do avatar
+                        loadAvatarImage(user);
                     } else {
                         // Se o login falhar, exiba uma mensagem ao usuário.
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
-                        showToast("Falha no login");
+                        showToast(loginFailureMessage);
                     }
                 });
+    }
+
+    private void loadAvatarImage(FirebaseUser user) {
+        if (user != null) {
+            String photoUrl = user.getPhotoUrl().toString();
+            // Use Glide para carregar a imagem do avatar
+            avatarImageView.setVisibility(View.VISIBLE);
+            Glide.with(getBaseContext())
+                    .load(photoUrl)
+                    .placeholder(R.drawable.placeholder_image) // Recurso de imagem padrão
+                    .into(avatarImageView);
+        }
     }
 
     private void updateGoogleSignInButtonText() {

@@ -4,4 +4,7 @@
     <string name="nome">Nome</string>
     <string name="telefone">Telefone</string>
     <string name="default_web_client_id">921271401436-udsqgbv274shi7m7p7tj6e17112ddjke.apps.googleusercontent.com</string>
+    <string name="logout_success_message">Logoff bem-sucedido!</string>
+    <string name="login_success_message">"Login bem-sucedido como "</string>
+    <string name="login_failure_message">Falha no login</string>
 </resources>
