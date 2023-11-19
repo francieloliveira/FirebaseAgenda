@@ -41,43 +41,49 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/buttonGoogleSignIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="52dp"
+        android:text="Login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/editTextID"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:id="@+id/buttonCreate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:text="Create"
-        app:layout_constraintStart_toEndOf="@+id/editTextID"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/buttonGoogleSignIn"
+        app:layout_constraintTop_toBottomOf="@+id/buttonGoogleSignIn" />
 
     <Button
         android:id="@+id/buttonRetrieve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="4dp"
         android:text="Retrieve"
         app:layout_constraintEnd_toEndOf="@+id/buttonCreate"
-        app:layout_constraintStart_toStartOf="@+id/buttonCreate"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonUpdate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="112dp"
-        android:text="Update"
-        app:layout_constraintEnd_toEndOf="@+id/buttonRetrieve"
-        app:layout_constraintStart_toStartOf="@+id/buttonRetrieve"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonCreate" />
 
     <Button
         android:id="@+id/buttonDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="5dp"
         android:text="Delete"
         app:layout_constraintEnd_toEndOf="@+id/buttonUpdate"
-        app:layout_constraintStart_toStartOf="@+id/buttonUpdate"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonUpdate" />
+
+    <Button
+        android:id="@+id/buttonUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Update"
+        app:layout_constraintEnd_toEndOf="@+id/buttonRetrieve"
+        app:layout_constraintTop_toBottomOf="@+id/buttonRetrieve" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

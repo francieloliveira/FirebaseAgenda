@@ -1,16 +1,36 @@
 package com.example.firebaseagenda;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.BeginSignInResult;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,8 +43,14 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    //Login
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
+    private FirebaseAuth mAuth;
+    private static final int RC_SIGN_IN = 123; // Um código de solicitação para identificar a resposta do login
+
     EditText mEditTextID, mEditTextName, mEditTextPhone;
-    Button mButtonCreate, mButtonRetrieve, mButtonUpdate, mButtonDelete;
+    Button mButtonCreate, mButtonRetrieve, mButtonUpdate, mButtonDelete, mButtonGoogleSignIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
         mButtonRetrieve = findViewById(R.id.buttonRetrieve);
         mButtonUpdate = findViewById(R.id.buttonUpdate);
         mButtonDelete = findViewById(R.id.buttonDelete);
+        mButtonGoogleSignIn = findViewById(R.id.buttonGoogleSignIn);
+
+        //Login
+        mAuth = FirebaseAuth.getInstance();
+        oneTapClient = Identity.getSignInClient(this);
 
         //Buttons Listners
         mButtonCreate.setOnClickListener(new View.OnClickListener() {
@@ -67,6 +98,75 @@ public class MainActivity extends AppCompatActivity {
                 deleteAgendaData();
             }
         });
+
+        mButtonGoogleSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGoogleSignInFlow();
+            }
+        });
+
+        signInRequest = BeginSignInRequest.builder()
+                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                        .setSupported(true)
+                        .build())
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                // Automatically sign in when exactly one credential is retrieved.
+                .setAutoSelectEnabled(true)
+                .build();
+
+    }
+
+    private void startGoogleSignInFlow() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Resultado retornado da intent de login do Google
+        if (requestCode == RC_SIGN_IN) {
+            try {
+                // Tarefa completa com a intenção de login do Google
+                GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException.class);
+
+                // Autenticar com o Firebase usando o token de ID do Google
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                Log.w(TAG, "Google sign in failed", e);
+            }
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Login bem-sucedido
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        showToast("Login bem-sucedido como " + user.getDisplayName());
+                    } else {
+                        // Se o login falhar, exiba uma mensagem ao usuário.
+                        Log.w(TAG, "signInWithCredential:failure", task.getException());
+                        showToast("Falha no login");
+                    }
+                });
     }
 
     private void createAgendaData() {
@@ -86,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     private void retrieveAgendaData() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
-        long ID = Long.parseLong(mEditTextID.getText().toString());
+        int ID = Integer.parseInt(mEditTextID.getText().toString());
 
         reference.child("agenda").orderByChild("id").equalTo(ID).addChildEventListener(new ChildEventListener() {
             @Override

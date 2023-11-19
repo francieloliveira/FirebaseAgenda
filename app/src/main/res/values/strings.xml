@@ -3,4 +3,5 @@
     <string name="id">ID</string>
     <string name="nome">Nome</string>
     <string name="telefone">Telefone</string>
+    <string name="default_web_client_id">921271401436-udsqgbv274shi7m7p7tj6e17112ddjke.apps.googleusercontent.com</string>
 </resources>
