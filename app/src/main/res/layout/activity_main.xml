@@ -6,84 +6,93 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/editTextID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="@string/id"
-        android:inputType="text"
+    <ImageView
+        android:id="@+id/avatarImageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholder_image"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/editTextName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="61dp"
-        android:ems="10"
-        android:hint="@string/nome"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="@+id/editTextID"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editTextPhone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="106dp"
+        android:layout_marginTop="14dp"
         android:ems="10"
         android:hint="@string/telefone"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="@+id/editTextName"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:ems="10"
+        android:hint="@string/nome"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/editTextID"
+        app:layout_constraintTop_toBottomOf="@+id/editTextID" />
+
+    <EditText
+        android:id="@+id/editTextID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/id"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/avatarImageView"
+        app:layout_constraintTop_toBottomOf="@+id/avatarImageView" />
 
     <Button
         android:id="@+id/buttonGoogleSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
+        android:layout_marginEnd="48dp"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/editTextID"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonCreate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Create"
-        app:layout_constraintEnd_toEndOf="@+id/buttonGoogleSignIn"
-        app:layout_constraintTop_toBottomOf="@+id/buttonGoogleSignIn" />
+        app:layout_constraintTop_toTopOf="@+id/editTextID" />
 
     <Button
         android:id="@+id/buttonRetrieve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="10dp"
         android:text="Retrieve"
         app:layout_constraintEnd_toEndOf="@+id/buttonCreate"
         app:layout_constraintTop_toBottomOf="@+id/buttonCreate" />
 
     <Button
+        android:id="@+id/buttonUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:text="Update"
+        app:layout_constraintEnd_toEndOf="@+id/buttonRetrieve"
+        app:layout_constraintTop_toBottomOf="@+id/buttonRetrieve" />
+
+    <Button
         android:id="@+id/buttonDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:text="Delete"
         app:layout_constraintEnd_toEndOf="@+id/buttonUpdate"
         app:layout_constraintTop_toBottomOf="@+id/buttonUpdate" />
 
     <Button
-        android:id="@+id/buttonUpdate"
+        android:id="@+id/buttonCreate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Update"
-        app:layout_constraintEnd_toEndOf="@+id/buttonRetrieve"
-        app:layout_constraintTop_toBottomOf="@+id/buttonRetrieve" />
+        android:layout_marginTop="9dp"
+        android:text="Create"
+        app:layout_constraintEnd_toEndOf="@+id/buttonGoogleSignIn"
+        app:layout_constraintTop_toBottomOf="@+id/buttonGoogleSignIn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,8 +14,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.BeginSignInResult;
 import com.google.android.gms.auth.api.identity.Identity;
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private BeginSignInRequest signInRequest;
     private FirebaseAuth mAuth;
     private static final int RC_SIGN_IN = 123; // Um código de solicitação para identificar a resposta do login
-
+    private boolean isUserLoggedIn = false;
     EditText mEditTextID, mEditTextName, mEditTextPhone;
     Button mButtonCreate, mButtonRetrieve, mButtonUpdate, mButtonDelete, mButtonGoogleSignIn;
 
@@ -56,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //ImageView
+        ImageView avatarImageView = findViewById(R.id.avatarImageView);
 
         //EditText
         mEditTextID = findViewById(R.id.editTextID);
@@ -69,9 +74,30 @@ public class MainActivity extends AppCompatActivity {
         mButtonDelete = findViewById(R.id.buttonDelete);
         mButtonGoogleSignIn = findViewById(R.id.buttonGoogleSignIn);
 
+        mButtonCreate.setEnabled(false);
+        mButtonRetrieve.setEnabled(false);
+        mButtonUpdate.setEnabled(false);
+        mButtonDelete.setEnabled(false);
+        mButtonGoogleSignIn.setEnabled(true);
+
         //Login
         mAuth = FirebaseAuth.getInstance();
         oneTapClient = Identity.getSignInClient(this);
+
+        signInRequest = BeginSignInRequest.builder()
+                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                        .setSupported(true)
+                        .build())
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                // Automatically sign in when exactly one credential is retrieved.
+                .setAutoSelectEnabled(true)
+                .build();
 
         //Buttons Listners
         mButtonCreate.setOnClickListener(new View.OnClickListener() {
@@ -98,29 +124,38 @@ public class MainActivity extends AppCompatActivity {
                 deleteAgendaData();
             }
         });
-
         mButtonGoogleSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startGoogleSignInFlow();
+                if (isUserLoggedIn) {
+                    // If the user is logged in, perform logoff
+                    mAuth.signOut();
+                    showToast("Logoff bem-sucedido");
+                    // Update the user state to disconnected
+                    isUserLoggedIn = false;
+                    // Update the button text
+                    updateGoogleSignInButtonText();
+                    // Disable buttons after logoff
+                    disableButtons();
+                    //Remove avatar
+//                    avatarImageView.setImageDrawable(null);
+//TODO não está removendo a imagem.
+
+                } else {
+                    // If the user is not logged in, start the login flow
+                    startGoogleSignInFlow();
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user != null) {
+                        String photoUrl = user.getPhotoUrl().toString();
+                        // Use Glide para carregar a imagem do avatar
+                        Glide.with(getBaseContext())
+                                .load(photoUrl)
+                                .placeholder(R.drawable.placeholder_image) // Recurso de imagem padrão
+                                .into(avatarImageView);
+                    }
+                }
             }
         });
-
-        signInRequest = BeginSignInRequest.builder()
-                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
-                        .setSupported(true)
-                        .build())
-                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                        .setSupported(true)
-                        // Your server's client ID, not your Android client ID.
-                        .setServerClientId(getString(R.string.default_web_client_id))
-                        // Only show accounts previously used to sign in.
-                        .setFilterByAuthorizedAccounts(true)
-                        .build())
-                // Automatically sign in when exactly one credential is retrieved.
-                .setAutoSelectEnabled(true)
-                .build();
-
     }
 
     private void startGoogleSignInFlow() {
@@ -161,12 +196,39 @@ public class MainActivity extends AppCompatActivity {
                         // Login bem-sucedido
                         FirebaseUser user = mAuth.getCurrentUser();
                         showToast("Login bem-sucedido como " + user.getDisplayName());
+
+                        enableButtons();
+                        // Atualizar o estado do usuário como logado
+                        isUserLoggedIn = true;
+
+                        // Atualizar o texto do botão
+                        updateGoogleSignInButtonText();
                     } else {
                         // Se o login falhar, exiba uma mensagem ao usuário.
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                         showToast("Falha no login");
                     }
                 });
+    }
+
+    private void updateGoogleSignInButtonText() {
+        mButtonGoogleSignIn.setText(isUserLoggedIn ? "Logoff" : "Login");
+    }
+
+    private void enableButtons() {
+        mButtonCreate.setEnabled(true);
+        mButtonRetrieve.setEnabled(true);
+        mButtonUpdate.setEnabled(true);
+        mButtonDelete.setEnabled(true);
+        mButtonGoogleSignIn.setEnabled(true);
+    }
+
+    private void disableButtons() {
+        mButtonCreate.setEnabled(false);
+        mButtonRetrieve.setEnabled(false);
+        mButtonUpdate.setEnabled(false);
+        mButtonDelete.setEnabled(false);
+        mButtonGoogleSignIn.setEnabled(true);
     }
 
     private void createAgendaData() {
